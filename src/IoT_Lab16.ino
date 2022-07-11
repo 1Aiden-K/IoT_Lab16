@@ -12,6 +12,7 @@ SYSTEM_MODE(MANUAL);
 
 int sent = 0;
 bool dc = false;
+bool connectMessage = true;
 
 LEDStatus status;
 OledWingAdafruit display;
@@ -70,12 +71,22 @@ void loop()
   display.loop();
   if (BLE.connected())
   {
+    if (connectMessage)
+    {
+      uint8_t txBuf[UART_TX_BUF_SIZE];
+      String message = "Connected";
+      message.toCharArray((char *)txBuf, message.length() + 1);
+      txCharacteristic.setValue(txBuf, message.length() + 1);
+      connectMessage = false;
+    }
+
     status.setColor(RGB_COLOR_BLUE);
 
     if (dc)
     {
       BLE.disconnect();
       dc = false;
+      connectMessage = true;
     }
   }
   else
